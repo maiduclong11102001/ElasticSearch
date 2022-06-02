@@ -1,43 +1,60 @@
 plugins {
     id("org.springframework.boot") version "2.6.7"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
     java
+    application
 }
 
 group = "com.spring"
-version = "0.0.1-SNAPSHOT"
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
+application {
+    mainClass.set("com.spring.elastic.ElasticApplication")
 }
 
-//configurations {
-//    compileOnly {
-//        extendsFrom annotationProcessor
-//    }
-//}
+java.sourceCompatibility = JavaVersion.VERSION_11
+
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation ("org.springframework.boot:spring-boot-starter-data-elasticsearch")
-    implementation ("org.springframework.boot:spring-boot-starter-thymeleaf")
-    implementation ("org.springframework.boot:spring-boot-starter-web")
-    compileOnly ("org.projectlombok:lombok")
-    developmentOnly ("org.springframework.boot:spring-boot-devtools")
-    annotationProcessor ("org.projectlombok:lombok")
-    testImplementation ("org.springframework.boot:spring-boot-starter-test")
+    implementation("org.springframework.boot:spring-boot-starter-data-elasticsearch")
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    compileOnly("org.projectlombok:lombok")
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
+    annotationProcessor("org.projectlombok:lombok")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
 tasks.test {
     useJUnitPlatform()
 }
 
-tasks.jar {
-    manifest {
-        attributes(mapOf("Implementation-Title" to project.name,
-            "Implementation-Version" to project.version))
+tasks {
+    val prjPath = project.projectDir.path
+
+    register("pathArgument") {
+        dependsOn(shadowJar)
+
+        if(project.hasProperty("jarpath")) {
+            doLast {
+                copy {
+                    from("$prjPath/build/libs/ElasticSearch.jar")
+                    into(project.property("jarpath").toString())
+                }
+            }
+        }
+    }
+
+    shadowJar {
+        archiveFileName.set("ElasticSearch.jar")
+        isZip64 = true
+    }
+
+    assemble {
+        dependsOn(get("pathArgument"))
     }
 }

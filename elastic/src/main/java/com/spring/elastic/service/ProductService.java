@@ -2,6 +2,8 @@ package com.spring.elastic.service;
 
 import com.spring.elastic.document.Product;
 import org.apache.http.HttpHost;
+import org.elasticsearch.ElasticsearchException;
+import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -53,6 +55,22 @@ public class ProductService {
                 .collect(Collectors.toList());
 
         operations.bulkIndex(queries, IndexCoordinates.of("product"));
+    }
+
+    public boolean indexAliasRequest(final String aliasName) {
+        IndicesAliasesRequest request = new IndicesAliasesRequest();
+
+        IndicesAliasesRequest.AliasActions aliasAction = IndicesAliasesRequest.AliasActions.add()
+                .index("product")
+                .alias(aliasName).filter("{ \"term\":  { \"brand\": \"apple\" }}");
+
+        request.addAliasAction(aliasAction);
+
+        try {
+            return client.indices().updateAliases(request, RequestOptions.DEFAULT).isAcknowledged();
+        } catch (IOException e) {
+            throw new ElasticsearchException("failed to update aliases with request: " + request, e);
+        }
     }
 
     public List<Product> queryString(final String string) {

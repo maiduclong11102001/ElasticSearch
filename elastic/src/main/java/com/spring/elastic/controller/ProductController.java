@@ -23,6 +23,11 @@ public class ProductController {
         service.createProductIndexBulk(products);
     }
 
+    @PostMapping("/alias/{aliasName}")
+    public boolean indexAliasRequest(@PathVariable final String aliasName) {
+        return service.indexAliasRequest(aliasName);
+    }
+
     @GetMapping("/questr")
     public List<Product> findById(@RequestBody final String queryString) {
         return service.queryString(queryString);
@@ -40,11 +45,11 @@ public class ProductController {
 
     @GetMapping()
     public List<Product> search(
-            @RequestParam(name="searchKey", required = false, defaultValue = "") String searchKey,
-            @RequestParam(name="c", required = false, defaultValue = "") String c,
-            @RequestParam(name="b", required = false, defaultValue = "") String b,
-            @RequestParam(name="pgt", required = false, defaultValue = "") Double pgt,
-            @RequestParam(name="plt", required = false, defaultValue = "") Double plt
+            @RequestParam(name = "searchKey", required = false, defaultValue = "") String searchKey,
+            @RequestParam(name = "c", required = false, defaultValue = "") String c,
+            @RequestParam(name = "b", required = false, defaultValue = "") String b,
+            @RequestParam(name = "pgt", required = false, defaultValue = "") Double pgt,
+            @RequestParam(name = "plt", required = false, defaultValue = "") Double plt
     ) {
         return service.search(searchKey, c, b, pgt, plt);
     }
