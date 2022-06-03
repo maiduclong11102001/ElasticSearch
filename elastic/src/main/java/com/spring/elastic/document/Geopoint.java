@@ -1,9 +1,9 @@
 package com.spring.elastic.document;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.core.geo.GeoPoint;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.GeoPointField;
-import org.springframework.data.elasticsearch.core.geo.GeoPoint;
 
 @Document(indexName = "geopoint")
 public class Geopoint {
@@ -11,7 +11,7 @@ public class Geopoint {
     private String id;
 
     @GeoPointField
-    private double[] coordinate;
+    private GeoPoint coordinate;
 
     public String getId() {
         return id;
@@ -21,11 +21,11 @@ public class Geopoint {
         this.id = id;
     }
 
-    public double[] getCoordinate() {
+    public GeoPoint getCoordinate() {
         return coordinate;
     }
 
-    public void setCoordinate(double[] coordinate) {
+    public void setCoordinate(GeoPoint coordinate) {
         this.coordinate = coordinate;
     }
 }
