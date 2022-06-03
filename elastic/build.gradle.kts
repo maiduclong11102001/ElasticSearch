@@ -14,7 +14,6 @@ application {
 
 java.sourceCompatibility = JavaVersion.VERSION_11
 
-
 repositories {
     mavenCentral()
 }
@@ -36,25 +35,29 @@ tasks.test {
 tasks {
     val prjPath = project.projectDir.path
 
+    shadowJar {
+        archiveFileName.set("ElasticSearch.jar")
+        isZip64 = true
+    }
+
     register("pathArgument") {
         dependsOn(shadowJar)
 
         if(project.hasProperty("jarpath")) {
             doLast {
                 copy {
-                    from("$prjPath/build/libs/ElasticSearch.jar")
+                    from("$prjPath/build/libs/ElasticSearch.jar", "$prjPath/build/libs/elastic.jar")
                     into(project.property("jarpath").toString())
                 }
             }
         }
     }
 
-    shadowJar {
-        archiveFileName.set("ElasticSearch.jar")
-        isZip64 = true
-    }
-
     assemble {
-        dependsOn(get("pathArgument"))
+        dependsOn("pathArgument")
     }
+}
+
+tasks.jar {
+    enabled = false
 }

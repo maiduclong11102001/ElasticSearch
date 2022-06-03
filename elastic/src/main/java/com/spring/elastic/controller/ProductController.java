@@ -2,11 +2,13 @@ package com.spring.elastic.controller;
 
 import com.spring.elastic.document.Product;
 import com.spring.elastic.service.ProductService;
-import org.elasticsearch.search.aggregations.metrics.Max;
+import org.elasticsearch.search.aggregations.bucket.terms.ParsedStringTerms;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/product")
@@ -39,7 +41,7 @@ public class ProductController {
     }
 
     @GetMapping("/filter")
-    public long filterAggregation() {
+    public Map<String, Long> filterAggregation() {
         return service.filterAggregation();
     }
 

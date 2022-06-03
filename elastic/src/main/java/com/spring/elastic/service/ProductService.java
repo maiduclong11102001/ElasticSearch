@@ -14,12 +14,12 @@ import org.elasticsearch.common.lucene.search.function.FunctionScoreQuery;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
+import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
-import org.elasticsearch.search.aggregations.bucket.filter.Filter;
-import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.Max;
-import org.elasticsearch.search.aggregations.metrics.MaxAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.terms.ParsedStringTerms;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
@@ -32,7 +32,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -134,24 +136,34 @@ public class ProductService {
         return products;
     }
 
-    public long filterAggregation() {
-        FilterAggregationBuilder filter = AggregationBuilders.filter("filter_brand", QueryBuilders.termQuery("brand", "apple"));
+    public Map<String, Long> filterAggregation() {
+//        FilterAggregationBuilder filter = AggregationBuilders.filter("filter_brand", QueryBuilders.termQuery("brand", "apple"));
+//
+//        MaxAggregationBuilder max = AggregationBuilders.max("price").field("price");
 
-        MaxAggregationBuilder max = AggregationBuilders.max("price").field("price");
+        TermsAggregationBuilder terms = AggregationBuilders.terms("term").field("brand.keyword");
 
-        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().aggregation(filter);
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().aggregation(terms);
 
         SearchRequest searchRequest = new SearchRequest().source(sourceBuilder);
 
-        Filter filterBrand;
-
-        Max maxtest;
+//        Filter filterBrand;
+//
+//        Max maxtest;
 
         try {
             SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
-            Aggregations aggregations = response.getAggregations();
-            filterBrand = aggregations.get("filter_brand");
-            return filterBrand.getDocCount();
+
+            Terms termsTest = response.getAggregations().get("term");
+
+            List<Terms.Bucket> buckets = (List<Terms.Bucket>)termsTest.getBuckets();
+
+            Map<String, Long> result = new HashMap<>();
+
+            buckets.forEach(bucket -> result.put(bucket.getKeyAsString(), bucket.getDocCount()));
+
+            return result;
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
