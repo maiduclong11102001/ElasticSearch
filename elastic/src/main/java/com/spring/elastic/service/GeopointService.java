@@ -44,7 +44,7 @@ public class GeopointService {
 
     public List<Map<String, Object>> geopointDistance() {
         Query query = new NativeSearchQueryBuilder().withQuery(QueryBuilders.matchAllQuery())
-                .withSorts(SortBuilders.geoDistanceSort("coordinate", 40, 70).order(SortOrder.ASC))
+                .withSorts(SortBuilders.geoDistanceSort("coordinate", 10.880013415721521, 106.81087990196458).order(SortOrder.ASC))
                 .build();
 
         SearchHits<Geopoint> geopoints = operations.search(query, Geopoint.class);
@@ -53,7 +53,8 @@ public class GeopointService {
 
         for (SearchHit<Geopoint> geopoint : geopoints) {
             Map<String, Object> map = new HashMap<>();
-            map.put("distance", geopoint.getSortValues().get(0));
+            double distance = (double)geopoint.getSortValues().get(0);
+            map.put("distance", ((double)Math.round(distance)/1000) + " km");
             map.put("content", geopoint.getContent());
 
             result.add(map);
